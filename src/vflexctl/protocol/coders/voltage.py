@@ -1,3 +1,23 @@
+"""Voltage payload encoder/decoder for the VFlex protocol.
+
+Voltage is represented as an unsigned 16-bit integer giving the value in
+**millivolts** (e.g. 12 000 mV = 12.00 V).  On the wire it occupies two
+protocol bytes arranged big-endian: ``[high_byte, low_byte]``.
+
+The protocol message layout for a voltage response is::
+
+    [length=4, CMD_GET_VOLTAGE (0x12), high_byte, low_byte]
+
+Functions
+---------
+protocol_encode_millivolts
+    ``int -> (high, low)``
+protocol_decode_millivolts
+    ``(high, low) -> int``
+get_millivolts_from_protocol_message
+    Validate a full protocol response and extract the millivolt value.
+"""
+
 __all__ = ["protocol_encode_millivolts", "protocol_decode_millivolts", "get_millivolts_from_protocol_message"]
 
 from vflexctl.exceptions import InvalidProtocolMessageLengthError, IncorrectCommandByte

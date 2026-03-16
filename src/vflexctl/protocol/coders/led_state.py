@@ -1,3 +1,15 @@
+"""LED-state payload decoder for the VFlex protocol.
+
+The LED-state response from the device is a single byte:
+
+* ``0x00`` (``False``) -- LED is **always on** (factory default).
+* ``0x01`` (``True``)  -- LED is **disabled during operation**.
+
+The full protocol message layout is::
+
+    [length=3, CMD_GET_LED_STATE (0x0F), state_byte]
+"""
+
 from vflexctl.exceptions import InvalidProtocolMessageLengthError, IncorrectCommandByte
 from vflexctl.protocol import VFlexProto
 

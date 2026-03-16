@@ -1,3 +1,26 @@
+"""Custom exceptions for the vflexctl package.
+
+Exception Hierarchy
+-------------------
+::
+
+    ValueError
+    └── InvalidProtocolMessageError
+        └── InvalidProtocolMessageLengthError
+        └── IncorrectCommandByte
+
+    Exception
+    └── UnsafeAdjustmentError
+        └── SerialNumberMismatchError
+        └── VoltageMismatchError
+
+Protocol-related errors inherit from :class:`ValueError` so that callers
+can catch broad protocol failures with a single handler.  Safety errors
+inherit from :class:`Exception` and are raised when a state-mutating
+operation detects potentially dangerous conditions (device changed, voltage
+drifted unexpectedly).
+"""
+
 __all__ = [
     "InvalidProtocolMessageLengthError",
     "InvalidProtocolMessageError",
@@ -9,6 +32,13 @@ __all__ = [
 
 
 class InvalidProtocolMessageError(ValueError):
+    """A received protocol message is malformed or unrecognisable.
+
+    Attributes
+    ----------
+    protocol_message : list[int]
+        The raw protocol bytes that triggered the error.
+    """
 
     def __init__(self, protocol_message: list[int], message: str = "Invalid protocol message"):
         self.protocol_message = protocol_message
@@ -16,6 +46,7 @@ class InvalidProtocolMessageError(ValueError):
 
 
 class InvalidProtocolMessageLengthError(InvalidProtocolMessageError):
+    """The protocol message does not have the expected byte count."""
 
     def __init__(
         self,
@@ -27,6 +58,8 @@ class InvalidProtocolMessageLengthError(InvalidProtocolMessageError):
 
 
 class IncorrectCommandByte(InvalidProtocolMessageError):
+    """The command byte in the protocol message does not match the expected command."""
+
     def __init__(
         self,
         protocol_message: list[int],
@@ -37,6 +70,11 @@ class IncorrectCommandByte(InvalidProtocolMessageError):
 
 
 class UnsafeAdjustmentError(Exception):
+    """A state-mutating operation was aborted because a safety check failed.
+
+    This is the base class for all safety-related exceptions that prevent
+    the tool from making a potentially dangerous change to the device.
+    """
 
     def __init__(self, ex_message: str | None = None):
         msg = "An unsafe adjustment to the connected VFlex was stopped."
@@ -46,6 +84,11 @@ class UnsafeAdjustmentError(Exception):
 
 
 class SerialNumberMismatchError(UnsafeAdjustmentError):
+    """The device serial number changed between consecutive queries.
+
+    This usually indicates that a different physical device is now
+    connected on the same MIDI port.
+    """
 
     def __init__(self, old_serial_number: str | None = None, new_serial_number: str | None = None):
         msg = ["The serial number does not match the last fetched serial number."]
@@ -58,6 +101,16 @@ class SerialNumberMismatchError(UnsafeAdjustmentError):
 
 
 class VoltageMismatchError(UnsafeAdjustmentError):
+    """The stored voltage does not match the voltage read back from the device.
+
+    Attributes
+    ----------
+    stored_voltage : int | None
+        The millivolt value the application believed the device was set to.
+    retrieved_voltage : int | None
+        The millivolt value the device actually reported.
+    """
+
     stored_voltage: int | None = None
     retrieved_voltage: int | None = None
 

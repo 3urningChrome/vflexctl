@@ -1,3 +1,5 @@
+"""Protocol message builders for voltage get/set commands."""
+
 from vflexctl.protocol import VFlexProto
 from vflexctl.protocol.coders import protocol_encode_millivolts
 from vflexctl.types import VFlexProtoMessage

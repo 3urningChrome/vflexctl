@@ -1,3 +1,10 @@
+"""Protocol message builders for hardware identification commands.
+
+These commands request read-only device metadata (firmware version,
+hardware revision) and carry no payload -- the protocol message is just
+the command byte itself.
+"""
+
 from vflexctl.protocol import VFlexProto
 from vflexctl.types import VFlexProtoMessage
 

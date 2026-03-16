@@ -1,3 +1,5 @@
+"""Protocol message builder for the LED-state set command."""
+
 from typing import Literal
 
 from vflexctl.types import VFlexProtoMessage

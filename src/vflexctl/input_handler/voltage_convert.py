@@ -1,3 +1,19 @@
+"""Voltage conversion and normalisation utilities.
+
+User-facing voltage values are in **volts** (e.g. ``12.0``, ``5.50``),
+but the VFlex protocol operates in **millivolts** (``12000``, ``5500``).
+This module provides:
+
+* :func:`voltage_to_millivolt` -- convert a human-readable voltage to an
+  integer millivolt value suitable for the protocol layer.
+* :func:`decimal_normalise_voltage` -- normalise a voltage to a
+  :class:`~decimal.Decimal` rounded to 2 decimal places (centivolt
+  precision) for display purposes.
+
+All conversions use the :mod:`decimal` module to avoid floating-point
+rounding artefacts.
+"""
+
 from decimal import Decimal, InvalidOperation, ROUND_DOWN
 
 import structlog

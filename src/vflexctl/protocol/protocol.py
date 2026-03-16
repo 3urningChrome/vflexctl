@@ -1,3 +1,27 @@
+"""Core VFlex-over-MIDI protocol definitions and message parsing.
+
+The VFlex hardware adapter communicates via MIDI, but overlays its own
+protocol on top of standard MIDI NOTE_ON messages.  Each protocol byte is
+split into two 4-bit nibbles that are carried in the ``note`` and
+``velocity`` fields of a NOTE_ON event (status byte ``0x90``).
+
+A complete protocol *frame* looks like::
+
+    COMMAND_START  (0x80, 0, 0)
+    <length>  <command_byte>  [<payload> ...]
+    COMMAND_END    (0xA0, 0, 0)
+
+Where ``<length>`` counts the number of protocol bytes that follow
+(inclusive of itself), and ``<command_byte>`` identifies the operation
+(get/set voltage, get/set LED state, etc.).
+
+This module provides:
+
+* :class:`VFlexProto` -- sentinel constants for framing and command IDs.
+* :func:`protocol_message_from_midi_messages` -- reassembles a sequence of
+  MIDI triples into a validated protocol-level message.
+"""
+
 from typing import Final, cast
 from vflexctl.types import MIDITriplet
 

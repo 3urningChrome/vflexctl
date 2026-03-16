@@ -1,3 +1,23 @@
+"""Framing helpers that convert protocol-level commands into MIDI sequences.
+
+This module bridges the gap between *protocol messages* (lists of integer
+bytes such as ``[CMD_SET_VOLTAGE, high, low]``) and the *MIDI triplets*
+that are actually sent over the wire.  The two main entry points are:
+
+* :func:`prepare_command_frame` -- prepend the self-describing length byte
+  to a bare sub-command.
+* :func:`prepare_command_for_sending` -- wrap one or more framed commands
+  with ``COMMAND_START`` / ``COMMAND_END`` sentinels and split every
+  protocol byte into its high/low-nibble NOTE_ON encoding.
+
+Typical call chain::
+
+    sub_cmd  = set_voltage_command(12000)          # [0x92, hi, lo]
+    frame    = prepare_command_frame(sub_cmd)       # [len, 0x92, hi, lo]
+    midi_seq = prepare_command_for_sending(frame)   # [(0x80,0,0), ..., (0xA0,0,0)]
+    send_sequence(port, midi_seq)
+"""
+
 from collections.abc import Iterable
 from typing import cast
 

@@ -1,3 +1,28 @@
+"""High-level interface for the VFlex MIDI power adapter.
+
+The :class:`VFlex` class is the primary public API for interacting with a
+VFlex device.  It manages MIDI I/O, caches device state (serial number,
+voltage, LED setting, firmware version), and exposes methods to read and
+write device parameters.
+
+Safety
+------
+When ``safe_adjust=True`` (the default) the class performs extra checks
+before mutating device state:
+
+* The serial number is verified on every handshake to make sure the same
+  physical device is still connected.
+* The stored voltage is compared against the live voltage before allowing
+  a ``set_voltage`` call, raising :class:`VoltageMismatchError` on
+  discrepancies.
+
+Handshake Modes
+---------------
+* **Quick handshake** (default): only re-fetches the serial number.
+* **Full handshake** (``full_handshake=True`` or ``initial_wake_up()``): also
+  retrieves the current voltage and LED state.
+"""
+
 from collections.abc import Callable
 from functools import wraps, cached_property
 from typing import Self, TypeVar, ParamSpec, Concatenate, cast, Literal
@@ -40,6 +65,16 @@ R = TypeVar("R")
 
 
 def run_with_handshake(func: Callable[Concatenate["VFlex", P], R]) -> Callable[Concatenate["VFlex", P], R]:
+    """Decorator that triggers a device handshake before the wrapped method runs.
+
+    Before every call to the decorated method, :meth:`VFlex.wake_up` is
+    invoked with the instance's current ``full_handshake`` setting.  This
+    ensures the device is in a known-good state and the serial number is
+    verified when ``safe_adjust`` is enabled.
+
+    The original (unwrapped) function is accessible via ``func.__wrapped__``
+    for unit-testing without triggering a real handshake.
+    """
 
     @wraps(func)
     def wrapper(v_flex: "VFlex", *args: P.args, **kwargs: P.kwargs) -> R:

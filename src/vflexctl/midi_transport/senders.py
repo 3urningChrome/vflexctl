@@ -1,3 +1,14 @@
+"""MIDI output helpers -- transmit messages to a MIDI port.
+
+Messages are sent one MIDI *triplet* (3 bytes) at a time, with a short
+pause between each to avoid overwhelming the device.  Two functions are
+provided:
+
+* :func:`send_sequence` -- send an ordered list of MIDI triplets.
+* :func:`send_triplet` -- send a single 3-byte MIDI message with an
+  optional post-send pause.
+"""
+
 from time import sleep
 
 import structlog
@@ -7,6 +18,7 @@ from mido.ports import BaseOutput, BaseIOPort
 from vflexctl.types import MIDITriplet
 
 DEFAULT_PAUSE_LENGTH = 0.020
+"""Default pause (in seconds) after each transmitted MIDI triplet."""
 
 log = structlog.get_logger("vflexctl.midi_senders")
 

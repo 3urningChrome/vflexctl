@@ -1,3 +1,16 @@
+"""MIDI input helpers -- read (drain) messages from a MIDI port.
+
+The VFlex device sends its responses as a stream of MIDI NOTE_ON messages.
+Because MIDI is asynchronous, the consumer must *drain* the input port for
+a fixed window of time to collect the full response.  The two public
+functions here cover:
+
+* :func:`drain_incoming` -- poll for ``seconds`` seconds, aggregating all
+  received messages.
+* :func:`drain_once` -- non-blocking single pass over currently pending
+  messages.
+"""
+
 from time import perf_counter, sleep
 from typing import cast
 
